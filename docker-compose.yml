@@ -1,0 +1,33 @@
+# MarkItDown Web — one-command local deployment.
+#
+#   docker compose up --build
+#   → open http://localhost:8000
+#
+# The document library is persisted in the named volume `markitdown-data`,
+# so it survives container restarts and rebuilds.
+
+services:
+  markitdown-web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    image: markitdown-web:latest
+    container_name: markitdown-web
+    # Bound to localhost only by default (see the project's security notes).
+    # To expose on your LAN, change to "8000:8000" — and add authentication.
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - markitdown-data:/data
+    environment:
+      MARKITDOWN_DATA_DIR: /data
+      # 0 = unlimited (files are streamed to disk). Set e.g. 256 to cap per-file size.
+      MARKITDOWN_MAX_UPLOAD_MB: ${MARKITDOWN_MAX_UPLOAD_MB:-0}
+      # Optional LLM image descriptions (see .env.example):
+      MARKITDOWN_LLM_MODEL: ${MARKITDOWN_LLM_MODEL:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-}
+    restart: unless-stopped
+
+volumes:
+  markitdown-data:

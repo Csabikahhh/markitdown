@@ -1,0 +1,44 @@
+# MarkItDown Web — document conversion UI + library, served by FastAPI/uvicorn.
+# Build:  docker build -f Dockerfile.web -t markitdown-web:latest .
+# Run:    docker run --rm -p 127.0.0.1:8000:8000 -v markitdown-data:/data markitdown-web:latest
+# Easiest: docker compose up --build   (see docker-compose.yml)
+
+FROM python:3.13-slim-bullseye
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    EXIFTOOL_PATH=/usr/bin/exiftool \
+    FFMPEG_PATH=/usr/bin/ffmpeg \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    MARKITDOWN_DATA_DIR=/data
+
+# Runtime tools used by the audio / image (EXIF) converters.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        ffmpeg \
+        exiftool \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Dependencies first, for better layer caching.
+COPY packages /app/packages
+COPY webapp/requirements.txt /app/webapp/requirements.txt
+RUN pip install /app/packages/markitdown[all] \
+    && pip install -r /app/webapp/requirements.txt
+
+# Application code.
+COPY webapp /app/webapp
+
+# Run as an unprivileged user; the mounted volume inherits /data's ownership.
+RUN useradd --create-home --uid 10001 appuser \
+    && mkdir -p /data \
+    && chown -R appuser:appuser /data /app
+USER appuser
+
+EXPOSE 8000
+VOLUME ["/data"]
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=25s --retries=3 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health')"
+
+CMD ["uvicorn", "webapp.server:app", "--host", "0.0.0.0", "--port", "8000"]

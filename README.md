@@ -287,6 +287,20 @@ docker build -t markitdown:latest .
 docker run --rm -i markitdown:latest < ~/your-file.pdf > output.md
 ```
 
+### Web UI + document library
+
+A browser front-end with drag-and-drop upload, PDF (and all supported formats)
+conversion, faithful `.md` / original-file downloads, and a persistent document
+library ships in [`webapp/`](webapp/README.md). Run it with Docker Compose:
+
+```sh
+docker compose up --build
+# then open http://localhost:8000
+```
+
+The library is stored in a persistent volume. See [`webapp/README.md`](webapp/README.md)
+for configuration and the HTTP API.
+
 ## Contributing
 
 This project welcomes contributions and suggestions. Most contributions require you to agree to a

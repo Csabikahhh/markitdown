@@ -1,0 +1,7 @@
+# Web app dependencies (the markitdown package itself is installed separately,
+# e.g. `pip install ./packages/markitdown[all]`).
+fastapi>=0.110
+uvicorn[standard]>=0.29
+python-multipart>=0.0.9
+# Optional: only used when MARKITDOWN_LLM_MODEL + OPENAI_API_KEY are set.
+openai>=1.0

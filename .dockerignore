@@ -1,2 +1,11 @@
 *
 !packages/
+!webapp/
+
+# Never ship local state or caches into the image
+webapp/data/
+data/
+**/__pycache__/
+**/*.pyc
+**/.pytest_cache/
+.git/

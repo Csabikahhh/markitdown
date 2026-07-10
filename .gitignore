@@ -166,3 +166,7 @@ cython_debug/
 src/.DS_Store
 .DS_Store
 .cursorrules
+
+# MarkItDown Web — local document library (persisted; do not commit)
+/data/
+webapp/data/
